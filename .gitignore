@@ -1,0 +1,4 @@
+pocsag-monitor
+*.log
+*.db
+go.sum
