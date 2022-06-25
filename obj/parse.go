@@ -26,10 +26,10 @@ func init() {
 
 func ParseAlphaMessage(ts time.Time, m string) (AlphaMessage, error) {
 	if !strings.Contains(m, "POCSAG512: ") {
-		log.Printf("%s: DEBUG: %s\n", ts.Format("2006-01-02 15:04:05"), m)
+		log.Printf("DEBUG: %s\n", m)
 		return AlphaMessage{}, nil
 	}
-	//log.Printf("%s: INFO: %s\n", ts.Format("2006-01-02 15:04:05"), m)
+	//log.Printf("INFO: %s\n", m)
 
 	// Parse cap and message
 	var cap string
