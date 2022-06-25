@@ -1,4 +1,4 @@
-package main
+package obj
 
 import (
 	"log"
@@ -12,13 +12,6 @@ var (
 	messageRegex *regexp.Regexp
 )
 
-type alphaMessage struct {
-	Timestamp time.Time
-	CapCode   string
-	Message   string
-	Valid     bool
-}
-
 func init() {
 	var err error
 	capRegex, err = regexp.Compile(` Address:\s+(\d+) `)
@@ -31,10 +24,10 @@ func init() {
 	}
 }
 
-func parse(ts time.Time, m string) (alphaMessage, error) {
+func ParseAlphaMessage(ts time.Time, m string) (AlphaMessage, error) {
 	if !strings.Contains(m, "POCSAG512: ") {
 		log.Printf("%s: DEBUG: %s\n", ts.Format("2006-01-02 15:04:05"), m)
-		return alphaMessage{}, nil
+		return AlphaMessage{}, nil
 	}
 	//log.Printf("%s: INFO: %s\n", ts.Format("2006-01-02 15:04:05"), m)
 
@@ -56,5 +49,5 @@ func parse(ts time.Time, m string) (alphaMessage, error) {
 	message = strings.ReplaceAll(message, "<LF>", "|")
 
 	//log.Printf("ts = %d, cap = %s, message = %s", ts.Unix(), cap, message)
-	return alphaMessage{Timestamp: ts, CapCode: cap, Message: message, Valid: message != ""}, nil
+	return AlphaMessage{Timestamp: ts, CapCode: cap, Message: message, Valid: message != ""}, nil
 }

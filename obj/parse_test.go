@@ -1,11 +1,11 @@
-package main
+package obj
 
 import (
 	"testing"
 	"time"
 )
 
-func Test_Parse(t *testing.T) {
+func Test_ParseAlphaMessage(t *testing.T) {
 	data := []string{
 		`POCSAG512: Address:  780777  Function: 0  Alpha:   PUTNAM FIRE BE ADVISED ENGINE 278 IS BACK IN SERVICE.<EOT>`,
 		`POCSAG512: Address:   56896  Function: 1 `,
@@ -21,7 +21,7 @@ func Test_Parse(t *testing.T) {
 
 	for _, d := range data {
 		ts := time.Now()
-		alpha, err := parse(ts, d)
+		alpha, err := ParseAlphaMessage(ts, d)
 		if err != nil {
 			t.Fatal(err)
 		}

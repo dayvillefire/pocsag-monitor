@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/genjidb/genji"
+	"github.com/dayvillefire/pocsag-monitor/db"
+	"github.com/dayvillefire/pocsag-monitor/obj"
 )
 
 var (
@@ -25,14 +25,13 @@ var (
 func main() {
 	flag.Parse()
 
-	db, err := genji.Open(*dbfile)
+	DB, err := db.OpenDB(*dbfile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-	db = db.WithContext(context.Background())
+	defer DB.Close()
 
-	err = initDb(db)
+	err = db.InitDB(DB)
 	if err != nil {
 		log.Printf("ERR: %s", err.Error())
 	}
@@ -62,9 +61,9 @@ func main() {
 	for scanner.Scan() {
 		m := scanner.Text()
 		ts := time.Now()
-		alpha, err := parse(ts, m)
+		alpha, err := obj.ParseAlphaMessage(ts, m)
 		if err != nil {
-			record(db, alpha)
+			db.Record(DB, alpha)
 		}
 	}
 	mmonCmd.Wait()
@@ -103,19 +102,4 @@ func main() {
 			fmt.Printf("%s: %s\n", time.Now().Format("2006-01-02 15:04:05"), m)
 		}
 	*/
-}
-
-func initDb(db *genji.DB) error {
-	return db.Exec(`
-    CREATE TABLE entry (
-        timestamp       INT     PRIMARY KEY,
-        cap             TEXT    NOT NULL,
-        message         TEXT    NOT NULL,
-        INDEX(cap)
-    )
-`)
-}
-
-func record(db *genji.DB, alpha alphaMessage) error {
-	return db.Exec(`INSERT INTO entry ( timestamp, cap, message ) VALUES ( ?, ?, ? )`, alpha.Timestamp.Unix(), alpha.CapCode, alpha.Message)
 }
