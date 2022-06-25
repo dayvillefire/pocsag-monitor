@@ -32,8 +32,7 @@ func InitDB(db *genji.DB) error {
         timestamp       INT     PRIMARY KEY,
         cap             TEXT    NOT NULL,
         message         TEXT    NOT NULL
-    )
-`)
+    );`)
 	if err != nil {
 		return err
 	}
