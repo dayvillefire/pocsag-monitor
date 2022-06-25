@@ -63,6 +63,7 @@ func main() {
 		ts := time.Now()
 		alpha, err := obj.ParseAlphaMessage(ts, m)
 		if err != nil {
+			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
 			db.Record(DB, alpha)
 		}
 	}

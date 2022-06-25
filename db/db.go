@@ -27,15 +27,18 @@ func OpenDB(fn string) (*genji.DB, error) {
 }
 
 func InitDB(db *genji.DB) error {
-	return db.Exec(`
+	err := db.Exec(`
     CREATE TABLE entry (
         timestamp       INT     PRIMARY KEY,
         cap             TEXT    NOT NULL,
-        message         TEXT    NOT NULL,
-        INDEX           (cap),
-		INDEX           (message)
+        message         TEXT    NOT NULL
     )
 `)
+	if err != nil {
+		return err
+	}
+	err = db.Exec(`CREATE INDEX idx_cap ON entry(cap);`)
+	return err
 }
 
 func Record(db *genji.DB, alpha obj.AlphaMessage) error {
