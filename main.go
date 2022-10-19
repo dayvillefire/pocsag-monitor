@@ -43,6 +43,11 @@ func main() {
 		}
 	}
 
+	_, err = getDiscordClient(discordToken)
+	if err != nil {
+		panic(err)
+	}
+
 	rtlArg := fmt.Sprintf("-f %s -p %s -s 22050", *freq, *ppm)
 	rtlCmd := exec.Command(*rtlfm, strings.Split(rtlArg, " ")...)
 
@@ -95,6 +100,7 @@ func main() {
 		}
 		if alpha.Valid {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
+			sendDiscordMessage(fmt.Sprintf("%s: %s", alpha.CapCode, alpha.Message))
 			db.Record(DB, alpha)
 			continue
 		}
