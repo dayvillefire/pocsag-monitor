@@ -18,19 +18,20 @@ import (
 )
 
 var (
-	dbfile = flag.String("db", "scan.db", "Database file")
-	rtlfm  = flag.String("rtlfm", "rtl_fm", "Binary path to rtl_fm")
-	freq   = flag.String("freq", "152.00750M", "Frequency (append with M, G, etc)")
-	mmon   = flag.String("mmon", "multimon-ng", "Binary path to multimon-ng")
-	ppm    = flag.String("ppm", "0", "Inaccuracy correction")
+	configFile = flag.String("config", "config.yaml", "Configuration file")
 )
 
 func main() {
 	flag.Parse()
 
-	_, exists := os.Stat(*dbfile)
+	config, err := LoadConfigWithDefaults(*configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	DB, err := db.OpenDB(*dbfile)
+	_, exists := os.Stat(config.DbFile)
+
+	DB, err := db.OpenDB(config.DbFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,18 +44,18 @@ func main() {
 		}
 	}
 
-	_, err = getDiscordClient(discordToken)
+	_, err = getDiscordClient(config.DiscordToken)
 	if err != nil {
 		panic(err)
 	}
 
-	rtlArg := fmt.Sprintf("-f %s -p %s -s 22050", *freq, *ppm)
-	rtlCmd := exec.Command(*rtlfm, strings.Split(rtlArg, " ")...)
+	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", config.Frequency, config.PPM)
+	rtlCmd := exec.Command(config.RtlFmBinary, strings.Split(rtlArg, " ")...)
 
 	rtlStderr, _ := rtlCmd.StderrPipe()
 
 	mmonArg := fmt.Sprintf("-t raw -a POCSAG512 -f alpha -u /dev/stdin")
-	mmonCmd := exec.Command(*mmon, strings.Split(mmonArg, " ")...)
+	mmonCmd := exec.Command(config.MultiMonBinary, strings.Split(mmonArg, " ")...)
 
 	mmonCmd.Stdin, _ = rtlCmd.StdoutPipe()
 	//mmonCmd.Stdout = os.Stdout
@@ -87,6 +88,8 @@ func main() {
 		mmonCmd.Process.Kill()
 	}()
 
+	router := Router{config.ChannelMappings}
+
 	scanner := bufio.NewScanner(io.MultiReader(stdout, rtlStderr))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -100,7 +103,18 @@ func main() {
 		}
 		if alpha.Valid {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
-			sendDiscordMessage(fmt.Sprintf("%s: %s", alpha.CapCode, alpha.Message))
+			dest := router.MapMessage(alpha)
+			for _, c := range dest {
+				sendDiscordMessage(
+					config.DiscordChannels[c],
+					fmt.Sprintf(
+						"%s: %s [%s]",
+						alpha.CapCode,
+						alpha.Message,
+						alpha.Timestamp.Format("2006-01-02 15:04:05"),
+					),
+				)
+			}
 			db.Record(DB, alpha)
 			continue
 		}

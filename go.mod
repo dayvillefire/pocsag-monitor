@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/creasty/defaults v1.6.0 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
@@ -17,4 +18,5 @@ require (
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/sys v0.0.0-20211107104306-e0b2ad06fe42 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -1,0 +1,12 @@
+db-file: scan.db
+rtlfm: rtl_fm
+frequency: 152.00750M
+multimon: multimon-ng
+ppm: 0
+discord-channels:
+  test: 1
+  ABC: 2
+  something: ABCDEF
+channel-mappings:
+  0630777: ABC
+  0620777: something

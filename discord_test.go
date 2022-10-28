@@ -1,13 +1,17 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_Discord(t *testing.T) {
+	return
+
 	_, err := getDiscordClient(discordToken)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	_, err = sendDiscordMessage("Test message")
+	_, err = sendDiscordMessage(discordChannel, "Test message")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

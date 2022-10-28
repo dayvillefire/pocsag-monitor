@@ -39,14 +39,14 @@ func getDiscordClient(token string) (*discordgo.Session, error) {
 	return discordSession, err
 }
 
-func sendDiscordMessage(msg string) (string, error) {
+func sendDiscordMessage(channel, msg string) (string, error) {
 	m := discordgo.MessageSend{
 		Content:         msg,
 		AllowedMentions: &discordgo.MessageAllowedMentions{},
 	}
 
 	// Post normal message
-	res, err := discordSession.ChannelMessageSendComplex(discordChannel, &m)
+	res, err := discordSession.ChannelMessageSendComplex(channel, &m)
 	if err != nil {
 		return "", err
 	}

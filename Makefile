@@ -7,4 +7,4 @@ binary: clean
 	GOARM=5 GOARCH=arm go build -v
 
 copy: binary
-	rsync -rvutpP pocsag-monitor pi@pi-pager:
+	rsync -rvutpP pocsag-monitor config.yaml pi@pi-pager:
