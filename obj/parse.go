@@ -47,6 +47,8 @@ func ParseAlphaMessage(ts time.Time, m string) (AlphaMessage, error) {
 	message = strings.ReplaceAll(message, "<NUL>", "")
 	message = strings.ReplaceAll(message, "<EOT>", "")
 	message = strings.ReplaceAll(message, "<LF>", "|")
+	message = strings.ReplaceAll(message, "<SUB>J", "|")
+	message = strings.ReplaceAll(message, "<SUB>M", "|")
 
 	//log.Printf("ts = %d, cap = %s, message = %s", ts.Unix(), cap, message)
 	return AlphaMessage{Timestamp: ts, CapCode: cap, Message: message, Valid: message != ""}, nil
