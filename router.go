@@ -3,7 +3,7 @@ package main
 import "github.com/dayvillefire/pocsag-monitor/obj"
 
 type Router struct {
-	ChannelMappings map[string]string
+	ChannelMappings map[string][]string
 }
 
 func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
@@ -11,12 +11,12 @@ func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 
 	// Check for a "DEFAULT" mapping
 	if m, ok := r.ChannelMappings["DEFAULT"]; ok {
-		out = append(out, m)
+		out = append(out, m...)
 	}
 
 	for k, v := range r.ChannelMappings {
 		if matchCap(k, msg.CapCode) {
-			out = append(out, v)
+			out = append(out, v...)
 		}
 	}
 

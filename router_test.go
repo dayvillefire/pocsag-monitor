@@ -8,10 +8,10 @@ import (
 
 func Test_Router(t *testing.T) {
 	r := Router{
-		ChannelMappings: map[string]string{
-			"DEFAULT": "012345",
-			"0620XXX": "NOT THIS ONE",
-			"0630XXX": "67890",
+		ChannelMappings: map[string][]string{
+			"DEFAULT": {"012345"},
+			"0620XXX": {"NOT THIS ONE"},
+			"0630XXX": {"67890"},
 		},
 	}
 	dest := r.MapMessage(obj.AlphaMessage{CapCode: "0630777"})

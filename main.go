@@ -15,6 +15,7 @@ import (
 
 	"github.com/dayvillefire/pocsag-monitor/db"
 	"github.com/dayvillefire/pocsag-monitor/obj"
+	"github.com/dayvillefire/pocsag-monitor/output"
 )
 
 var (
@@ -44,11 +45,6 @@ func main() {
 		}
 	}
 
-	_, err = getDiscordClient(config.DiscordToken)
-	if err != nil {
-		panic(err)
-	}
-
 	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", config.Frequency, config.PPM)
 	rtlCmd := exec.Command(config.RtlFmBinary, strings.Split(rtlArg, " ")...)
 
@@ -58,15 +54,10 @@ func main() {
 	mmonCmd := exec.Command(config.MultiMonBinary, strings.Split(mmonArg, " ")...)
 
 	mmonCmd.Stdin, _ = rtlCmd.StdoutPipe()
-	//mmonCmd.Stdout = os.Stdout
 	stdout, err := mmonCmd.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
-	//stderr, err := mmonCmd.StderrPipe()
-	//if err != nil {
-	//	panic(err)
-	//}
 	err = mmonCmd.Start()
 	if err != nil {
 		panic(err)
@@ -76,7 +67,6 @@ func main() {
 		panic(err)
 	}
 	defer stdout.Close()
-	//defer stderr.Close()
 	defer rtlStderr.Close()
 
 	sig := make(chan os.Signal, 1)
@@ -89,6 +79,18 @@ func main() {
 	}()
 
 	router := Router{config.ChannelMappings}
+
+	outputs := map[string]output.Output{}
+	for k, v := range config.OutputChannels {
+		outputs[k], err = output.InstantiateOutput(v.Plugin)
+		if err != nil {
+			panic(k + "| ERR: " + err.Error())
+		}
+		err = outputs[k].Init(v.Option)
+		if err != nil {
+			panic(k + "| ERR: " + err.Error())
+		}
+	}
 
 	scanner := bufio.NewScanner(io.MultiReader(stdout, rtlStderr))
 	scanner.Split(bufio.ScanLines)
@@ -105,14 +107,19 @@ func main() {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
 			dest := router.MapMessage(alpha)
 			for _, c := range dest {
-				sendDiscordMessage(
-					config.DiscordChannels[c],
-					fmt.Sprintf(
-						"%s: %s [%s]",
-						alpha.CapCode,
-						alpha.Message,
-						alpha.Timestamp.Format("2006-01-02 15:04:05"),
-					),
+				msg := fmt.Sprintf(
+					"%s: %s [%s]",
+					alpha.CapCode,
+					alpha.Message,
+					alpha.Timestamp.Format("2006-01-02 15:04:05"),
+				)
+				if config.Debug {
+					log.Printf("DEBUG: dest=%s|option=%s|msg=%s", dest, config.OutputChannels[c].Channel, msg)
+				}
+				outputs[c].SendMessage(
+					alpha,
+					config.OutputChannels[c].Option,
+					msg,
 				)
 			}
 			db.Record(DB, alpha)

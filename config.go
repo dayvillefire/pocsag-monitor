@@ -12,14 +12,20 @@ var (
 )
 
 type Config struct {
-	DbFile          string            `yaml:"db-file" default:"scan.db"`
-	RtlFmBinary     string            `yaml:"rtlfm" default:"rtl_fm"`
-	Frequency       string            `yaml:"frequency" default:"152.00750M"`
-	MultiMonBinary  string            `yaml:"multimon" default:"multimon-ng"`
-	PPM             int               `yaml:"ppm" default:"0"`
-	DiscordToken    string            `yaml:"discord-token"`
-	DiscordChannels map[string]string `yaml:"discord-channels"`
-	ChannelMappings map[string]string `yaml:"channel-mappings"`
+	Debug           bool                     `yaml:"debug" default:"false"`
+	DbFile          string                   `yaml:"db-file" default:"scan.db"`
+	RtlFmBinary     string                   `yaml:"rtlfm" default:"rtl_fm"`
+	Frequency       string                   `yaml:"frequency" default:"152.00750M"`
+	MultiMonBinary  string                   `yaml:"multimon" default:"multimon-ng"`
+	PPM             int                      `yaml:"ppm" default:"0"`
+	OutputChannels  map[string]OutputMapping `yaml:"output-channels"`
+	ChannelMappings map[string][]string      `yaml:"channel-mappings"`
+}
+
+type OutputMapping struct {
+	Plugin  string `yaml:"plugin"`
+	Option  string `yaml:"option"`
+	Channel string `yaml:"channel"`
 }
 
 // UnmarshalYAML overrides default handling
