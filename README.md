@@ -10,6 +10,7 @@ POCSAG monitor is currently keyed to publish to a number of different pluggable 
 
 * discord - Discord channels
 * stdout - Print to standard output
+* trigger - Trigger HTTP GET with substitutions
 
 ## PREREQUISITES
 
