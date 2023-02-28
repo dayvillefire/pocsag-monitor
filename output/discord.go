@@ -2,13 +2,14 @@ package output
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 )
 
 func init() {
-	outputMap["discord"] = func() Output { return &DiscordOutput{} }
+	RegisterOutput("discord", func() Output { return &DiscordOutput{} })
 }
 
 type DiscordOutput struct {
@@ -37,14 +38,16 @@ func (d *DiscordOutput) Init(token string) error {
 }
 
 func (d *DiscordOutput) SendMessage(a obj.AlphaMessage, channel, msg string) (string, error) {
-	m := discordgo.MessageSend{
-		Content:         msg,
-		AllowedMentions: &discordgo.MessageAllowedMentions{},
-	}
-
 	// Post normal message
-	res, err := d.discordSession.ChannelMessageSendComplex(channel, &m)
+	/*
+		res, err := d.discordSession.ChannelMessageSendComplex(channel, &discordgo.MessageSend{
+			Content:         msg,
+			AllowedMentions: &discordgo.MessageAllowedMentions{},
+		})
+	*/
+	res, err := d.discordSession.ChannelMessageSend(channel, msg)
 	if err != nil {
+		log.Printf("ERR: SendMessage(): %s", err.Error())
 		return "", err
 	}
 

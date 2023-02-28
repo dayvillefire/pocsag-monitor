@@ -2,6 +2,7 @@ package output
 
 import (
 	"errors"
+	"log"
 	"sync"
 
 	"github.com/dayvillefire/pocsag-monitor/obj"
@@ -37,5 +38,6 @@ func InstantiateOutput(name string) (o Output, err error) {
 func RegisterOutput(name string, o func() Output) {
 	outputMapLock.Lock()
 	defer outputMapLock.Unlock()
+	log.Printf("RegisterOutput: %s", name)
 	outputMap[name] = o
 }

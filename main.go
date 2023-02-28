@@ -19,6 +19,7 @@ import (
 
 var (
 	configFile = flag.String("config", "config.yaml", "Configuration file")
+	testConfig = flag.Bool("test-config", false, "Test config")
 )
 
 func main() {
@@ -27,6 +28,11 @@ func main() {
 	config, err := LoadConfigWithDefaults(*configFile)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if *testConfig {
+		log.Printf("%#v", config)
+		os.Exit(0)
 	}
 
 	//_, exists := os.Stat(config.DbFile)
@@ -70,12 +76,14 @@ func main() {
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGABRT)
+	go func(sig chan os.Signal, rtlCmd *exec.Cmd, mmonCmd *exec.Cmd) {
 		s := <-sig
 		log.Printf("Caught signal %s, terminating", s.String())
 		rtlCmd.Process.Kill()
 		mmonCmd.Process.Kill()
-	}()
+	}(sig, rtlCmd, mmonCmd)
 
 	router := Router{config.ChannelMappings}
 
@@ -117,7 +125,7 @@ func main() {
 				}
 				outputs[c].SendMessage(
 					alpha,
-					config.OutputChannels[c].Option,
+					config.OutputChannels[c].Channel,
 					msg,
 				)
 			}
