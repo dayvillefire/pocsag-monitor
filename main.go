@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dayvillefire/pocsag-monitor/db"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
 )
@@ -30,20 +29,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, exists := os.Stat(config.DbFile)
+	//_, exists := os.Stat(config.DbFile)
 
-	DB, err := db.OpenDB(config.DbFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer DB.Close()
+	//DB, err := db.OpenDB(config.DbFile)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer DB.Close()
 
-	if exists != nil {
-		err = db.InitDB(DB)
-		if err != nil {
-			log.Printf("ERR: %s", err.Error())
-		}
-	}
+	//if exists != nil {
+	//	err = db.InitDB(DB)
+	//	if err != nil {
+	//		log.Printf("ERR: %s", err.Error())
+	//	}
+	//}
 
 	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", config.Frequency, config.PPM)
 	rtlCmd := exec.Command(config.RtlFmBinary, strings.Split(rtlArg, " ")...)
@@ -122,7 +121,7 @@ func main() {
 					msg,
 				)
 			}
-			db.Record(DB, alpha)
+			//db.Record(DB, alpha)
 			continue
 		}
 	}
