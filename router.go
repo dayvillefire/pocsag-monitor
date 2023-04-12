@@ -9,6 +9,11 @@ type Router struct {
 func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 	out := []string{}
 
+	if len(msg.Message) < 4 {
+		// Don't post messages shorter than "TEST"
+		return out
+	}
+
 	// Check for a "DEFAULT" mapping
 	if m, ok := r.ChannelMappings["DEFAULT"]; ok {
 		out = append(out, m...)

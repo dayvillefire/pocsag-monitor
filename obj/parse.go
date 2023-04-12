@@ -44,12 +44,35 @@ func ParseAlphaMessage(ts time.Time, m string) (AlphaMessage, error) {
 	}
 
 	// Remove all null, etc
-	message = strings.ReplaceAll(message, "<NUL>", "")
-	message = strings.ReplaceAll(message, "<EOT>", "")
-	message = strings.ReplaceAll(message, "<LF>", "|")
-	message = strings.ReplaceAll(message, "<SUB>J", "|")
-	message = strings.ReplaceAll(message, "<SUB>M", "|")
+	message = runMultiple(message, strings.ReplaceAll, map[string]string{
+		"<NUL>":  "",
+		"<EOT>":  "",
+		"<DC1>":  "",
+		"<DLE>":  "",
+		"<LF>":   "|",
+		"<SUB>J": "|",
+		"<SUB>M": "|",
+	})
+	/*
+		message = strings.ReplaceAll(message, "<NUL>", "")
+		message = strings.ReplaceAll(message, "<EOT>", "")
+		message = strings.ReplaceAll(message, "<LF>", "|")
+		message = strings.ReplaceAll(message, "<SUB>J", "|")
+		message = strings.ReplaceAll(message, "<SUB>M", "|")
+	*/
 
 	//log.Printf("ts = %d, cap = %s, message = %s", ts.Unix(), cap, message)
 	return AlphaMessage{Timestamp: ts, CapCode: cap, Message: message, Valid: message != ""}, nil
 }
+
+func runMultiple(orig string, fn func(string, string, string) string, data map[string]string) string {
+	if fn == nil {
+		return orig
+	}
+	x := orig
+	for k, v := range data {
+		x = fn(x, k, v)
+	}
+	return x
+}
+ 

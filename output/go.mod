@@ -1,6 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor/output
 
-go 1.18
+go 1.20
 
 replace github.com/dayvillefire/pocsag-monitor/obj => ../obj
 

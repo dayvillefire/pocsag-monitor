@@ -1,6 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor
 
-go 1.18
+go 1.20
 
 replace (
 	github.com/dayvillefire/pocsag-monitor/obj => ./obj
@@ -8,7 +8,6 @@ replace (
 )
 
 require (
-	github.com/bwmarrin/discordgo v0.27.0
 	github.com/creasty/defaults v1.6.0
 	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20221231124256-8e6708b7891c
 	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20221231124256-8e6708b7891c
@@ -20,6 +19,7 @@ require (
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/bwmarrin/discordgo v0.27.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
@@ -37,7 +37,6 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
@@ -49,5 +48,4 @@ require (
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
