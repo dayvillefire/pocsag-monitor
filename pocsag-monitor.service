@@ -1,0 +1,15 @@
+[Unit]
+Description = POCSAG monitor
+After = network.target network-online.target
+Wants = network-online.target
+
+[Service]
+Type = notify
+PIDFile = /var/run/pocsag-monitor.pid
+ExecStart = /usr/local/bin/pocsag-monitor -config-file /etc/pocsag-monitor.yaml -daemon
+Restart = on-abort
+StartLimitInterval = 60
+StartLimitBurst = 10
+
+[Install]
+WantedBy = multi-user.target

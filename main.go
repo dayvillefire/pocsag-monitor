@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/coreos/go-systemd/daemon"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
 )
@@ -20,6 +21,7 @@ import (
 var (
 	configFile = flag.String("config", "config.yaml", "Configuration file")
 	testConfig = flag.Bool("test-config", false, "Test config")
+	daemonize  = flag.Bool("daemon", false, "Daemonize")
 )
 
 func main() {
@@ -33,6 +35,27 @@ func main() {
 	if *testConfig {
 		log.Printf("%#v", config)
 		os.Exit(0)
+	}
+
+	// Daemon stuff if we're configured for it.
+	if *daemonize {
+		go func() {
+			log.Printf("Daemon: INFO: Spawning systemd integration")
+
+			interval, err := daemon.SdWatchdogEnabled(false)
+			if err != nil {
+				log.Printf("ERR: %s", err.Error())
+				return
+			}
+			if interval == 0 {
+				log.Printf("ERR: interval == 0")
+				return
+			}
+			for {
+				daemon.SdNotify(false, daemon.SdNotifyWatchdog)
+				time.Sleep(interval / 3)
+			}
+		}()
 	}
 
 	//_, exists := os.Stat(config.DbFile)
@@ -84,6 +107,11 @@ func main() {
 		rtlCmd.Process.Kill()
 		mmonCmd.Process.Kill()
 	}(sig, rtlCmd, mmonCmd)
+	defer func(rtlCmd *exec.Cmd) {
+		// If, for some reason, this doesn't die gracefully, kill it with fire
+		log.Printf("Non-gracefully terminating rtl_fm")
+		rtlCmd.Process.Kill()
+	}(rtlCmd)
 
 	router := Router{config.ChannelMappings}
 
