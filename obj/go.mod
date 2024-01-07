@@ -1,3 +1,3 @@
 module github.com/dayvillefire/pocsag-monitor/obj
 
-go 1.20
+go 1.21

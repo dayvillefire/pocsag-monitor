@@ -1,6 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor
 
-go 1.20
+go 1.21
 
 replace (
 	github.com/dayvillefire/pocsag-monitor/obj => ./obj
@@ -11,8 +11,8 @@ require (
 	github.com/codegangsta/cli v1.20.0
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/creasty/defaults v1.7.0
-	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20230412213233-faa2c43219a4
-	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20230412213233-faa2c43219a4
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20230902204846-5d7fdba5601a
+	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20230902204846-5d7fdba5601a
 	github.com/dhogborg/go-pocsag v0.0.0-20151112204230-b07839f7ef4b
 	github.com/fatih/color v1.15.0
 	github.com/genjidb/genji v0.15.1
@@ -35,7 +35,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -48,9 +48,10 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	golang.org/x/crypto v0.12.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
