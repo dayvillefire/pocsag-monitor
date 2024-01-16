@@ -14,26 +14,28 @@ import (
 	"time"
 
 	"github.com/coreos/go-systemd/daemon"
+	"github.com/dayvillefire/pocsag-monitor/config"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
 )
 
 var (
-	configFile = flag.String("config", "config.yaml", "Configuration file")
-	testConfig = flag.Bool("test-config", false, "Test config")
-	daemonize  = flag.Bool("daemon", false, "Daemonize")
+	configFile        = flag.String("config", "config.yaml", "Configuration file")
+	dynamicConfigFile = flag.String("dynamic-config", "dynamic.yaml", "Dynamic configuration file")
+	testConfig        = flag.Bool("test-config", false, "Test config")
+	daemonize         = flag.Bool("daemon", false, "Daemonize")
 )
 
 func main() {
 	flag.Parse()
 
-	config, err := LoadConfigWithDefaults(*configFile)
+	cfg, err := config.LoadConfigWithDefaults(*configFile, *dynamicConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if *testConfig {
-		log.Printf("%#v", config)
+		log.Printf("%#v", cfg)
 		os.Exit(0)
 	}
 
@@ -58,28 +60,13 @@ func main() {
 		}()
 	}
 
-	//_, exists := os.Stat(config.DbFile)
-
-	//DB, err := db.OpenDB(config.DbFile)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer DB.Close()
-
-	//if exists != nil {
-	//	err = db.InitDB(DB)
-	//	if err != nil {
-	//		log.Printf("ERR: %s", err.Error())
-	//	}
-	//}
-
-	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", config.Frequency, config.PPM)
-	rtlCmd := exec.Command(config.RtlFmBinary, strings.Split(rtlArg, " ")...)
+	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", cfg.Frequency, cfg.PPM)
+	rtlCmd := exec.Command(cfg.RtlFmBinary, strings.Split(rtlArg, " ")...)
 
 	rtlStderr, _ := rtlCmd.StderrPipe()
 
 	mmonArg := fmt.Sprintf("-t raw -a POCSAG512 -f alpha -u /dev/stdin")
-	mmonCmd := exec.Command(config.MultiMonBinary, strings.Split(mmonArg, " ")...)
+	mmonCmd := exec.Command(cfg.MultiMonBinary, strings.Split(mmonArg, " ")...)
 
 	mmonCmd.Stdin, _ = rtlCmd.StdoutPipe()
 	stdout, err := mmonCmd.StdoutPipe()
@@ -113,10 +100,10 @@ func main() {
 		rtlCmd.Process.Kill()
 	}(rtlCmd)
 
-	router := Router{config.ChannelMappings}
+	router := Router{cfg.Dynamic.ChannelMappings}
 
 	outputs := map[string]output.Output{}
-	for k, v := range config.OutputChannels {
+	for k, v := range cfg.Dynamic.OutputChannels {
 		outputs[k], err = output.InstantiateOutput(v.Plugin)
 		if err != nil {
 			panic(k + "| ERR: " + err.Error())
@@ -148,12 +135,12 @@ func main() {
 					alpha.Message,
 					alpha.Timestamp.Format("2006-01-02 15:04:05"),
 				)
-				if config.Debug {
-					log.Printf("DEBUG: dest=%s|option=%s|msg=%s", dest, config.OutputChannels[c].Channel, msg)
+				if cfg.Debug {
+					log.Printf("DEBUG: dest=%s|option=%s|msg=%s", dest, cfg.Dynamic.OutputChannels[c].Channel, msg)
 				}
 				outputs[c].SendMessage(
 					alpha,
-					config.OutputChannels[c].Channel,
+					cfg.Dynamic.OutputChannels[c].Channel,
 					msg,
 				)
 			}

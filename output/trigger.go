@@ -1,7 +1,7 @@
 package output
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -20,7 +20,6 @@ func init() {
 //
 // * `{cap}` - CAP code
 // * `{msg}` - Raw message
-//
 type TriggerOutput struct {
 	url string
 }
@@ -40,7 +39,7 @@ func (s *TriggerOutput) SendMessage(a obj.AlphaMessage, channel, msg string) (st
 		log.Printf("ERR: %s: %s", u, err.Error())
 		return "", err
 	}
-	b, err := ioutil.ReadAll(r.Body)
+	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("ERR: %s: %s", u, err.Error())
 		return "", err
