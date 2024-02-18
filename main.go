@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -17,6 +19,8 @@ import (
 	"github.com/dayvillefire/pocsag-monitor/config"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -24,12 +28,18 @@ var (
 	dynamicConfigFile = flag.String("dynamic-config", "dynamic.yaml", "Dynamic configuration file")
 	testConfig        = flag.Bool("test-config", false, "Test config")
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
+
+	cfg         *config.Config
+	router      Router
+	outputs     map[string]output.Output
+	routerMutex *sync.Mutex
 )
 
 func main() {
 	flag.Parse()
 
-	cfg, err := config.LoadConfigWithDefaults(*configFile, *dynamicConfigFile)
+	var err error
+	cfg, err = config.LoadConfigWithDefaults(*configFile, *dynamicConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,9 +110,29 @@ func main() {
 		rtlCmd.Process.Kill()
 	}(rtlCmd)
 
-	router := Router{cfg.Dynamic.ChannelMappings}
+	{
+		log.Printf("INFO: Initializing web services")
+		m := gin.New()
+		m.Use(gin.Recovery())
 
-	outputs := map[string]output.Output{}
+		// Enable gzip compression
+		m.Use(gzip.Gzip(gzip.DefaultCompression))
+
+		InitApi(m)
+
+		go func() {
+			log.Printf("INFO: Initializing on :%d", config.GetConfig().ApiPort)
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", config.GetConfig().ApiPort), m); err != nil {
+				log.Fatal(err)
+			}
+		}()
+
+	}
+
+	// Dynamic channel mapping init
+	routerMutex.Lock()
+	router = Router{cfg.Dynamic.ChannelMappings}
+	outputs = map[string]output.Output{}
 	for k, v := range cfg.Dynamic.OutputChannels {
 		outputs[k], err = output.InstantiateOutput(v.Plugin)
 		if err != nil {
@@ -113,6 +143,7 @@ func main() {
 			panic(k + "| ERR: " + err.Error())
 		}
 	}
+	routerMutex.Unlock()
 
 	scanner := bufio.NewScanner(io.MultiReader(stdout, rtlStderr))
 	scanner.Split(bufio.ScanLines)
@@ -127,6 +158,7 @@ func main() {
 		}
 		if alpha.Valid {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
+			routerMutex.Lock()
 			dest := router.MapMessage(alpha)
 			for _, c := range dest {
 				msg := fmt.Sprintf(
@@ -136,7 +168,11 @@ func main() {
 					alpha.Timestamp.Format("2006-01-02 15:04:05"),
 				)
 				if cfg.Debug {
-					log.Printf("DEBUG: dest=%s|option=%s|msg=%s", dest, cfg.Dynamic.OutputChannels[c].Channel, msg)
+					log.Printf("DEBUG: dest=%s|option=%s|msg=%s",
+						dest,
+						cfg.Dynamic.OutputChannels[c].Channel,
+						msg,
+					)
 				}
 				outputs[c].SendMessage(
 					alpha,
@@ -144,6 +180,7 @@ func main() {
 					msg,
 				)
 			}
+			routerMutex.Unlock()
 			//db.Record(DB, alpha)
 			continue
 		}

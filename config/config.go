@@ -18,6 +18,7 @@ type Config struct {
 	Frequency      string         `yaml:"frequency" default:"152.00750M"`
 	MultiMonBinary string         `yaml:"multimon" default:"multimon-ng"`
 	PPM            int            `yaml:"ppm" default:"0"`
+	ApiPort        int            `yaml:"api-port" default:"8080"`
 	Dynamic        *DynamicConfig `yaml:"-"`
 }
 
@@ -70,4 +71,18 @@ func LoadConfigWithDefaults(configPath, dynamicConfigPath string) (*Config, erro
 	}
 
 	return c, err
+}
+
+func ReloadDynamicConfig(dynamicConfigPath string) (*DynamicConfig, error) {
+	d := &DynamicConfig{}
+	data, err := os.ReadFile(dynamicConfigPath)
+	if err != nil {
+		return d, err
+	}
+	err = yaml.Unmarshal([]byte(data), d)
+	if err != nil {
+		return d, err
+	}
+	config.Dynamic = d
+	return d, nil
 }
