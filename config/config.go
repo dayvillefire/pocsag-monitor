@@ -61,28 +61,28 @@ func LoadConfigWithDefaults(configPath, dynamicConfigPath string) (*Config, erro
 	}
 
 	{
-		d := &DynamicConfig{}
+		d := DynamicConfig{}
 		data, err = os.ReadFile(dynamicConfigPath)
 		if err != nil {
 			return c, err
 		}
-		err = yaml.Unmarshal([]byte(data), d)
-		c.Dynamic = d
+		err = yaml.Unmarshal([]byte(data), &d)
+		c.Dynamic = &d
 	}
 
 	return c, err
 }
 
-func ReloadDynamicConfig(dynamicConfigPath string) (*DynamicConfig, error) {
-	d := &DynamicConfig{}
+func ReloadDynamicConfig(dynamicConfigPath string) (DynamicConfig, error) {
+	d := DynamicConfig{}
 	data, err := os.ReadFile(dynamicConfigPath)
 	if err != nil {
 		return d, err
 	}
-	err = yaml.Unmarshal([]byte(data), d)
+	err = yaml.Unmarshal([]byte(data), &d)
 	if err != nil {
 		return d, err
 	}
-	config.Dynamic = d
+	//config.Dynamic = &d
 	return d, nil
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -19,8 +18,6 @@ import (
 	"github.com/dayvillefire/pocsag-monitor/config"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -32,7 +29,7 @@ var (
 	cfg         *config.Config
 	router      Router
 	outputs     map[string]output.Output
-	routerMutex *sync.Mutex
+	routerMutex = &sync.Mutex{}
 )
 
 func main() {
@@ -110,26 +107,30 @@ func main() {
 		rtlCmd.Process.Kill()
 	}(rtlCmd)
 
-	{
-		log.Printf("INFO: Initializing web services")
-		m := gin.New()
-		m.Use(gin.Recovery())
-
-		// Enable gzip compression
-		m.Use(gzip.Gzip(gzip.DefaultCompression))
-
-		InitApi(m)
-
+	/*
 		go func() {
-			log.Printf("INFO: Initializing on :%d", config.GetConfig().ApiPort)
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", config.GetConfig().ApiPort), m); err != nil {
-				log.Fatal(err)
-			}
-		}()
+			log.Printf("INFO: Initializing web services")
+			m := gin.New()
+			m.Use(gin.Recovery())
 
-	}
+			// Enable gzip compression
+			m.Use(gzip.Gzip(gzip.DefaultCompression))
+
+			InitApi(m)
+
+			go func() {
+				log.Printf("INFO: Initializing on :%d", cfg.ApiPort)
+				if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.ApiPort), m); err != nil {
+					log.Fatal(err)
+				}
+			}()
+		}()
+	*/
 
 	// Dynamic channel mapping init
+	if cfg.Debug {
+		log.Printf("DEBUG: Locking routerMutex")
+	}
 	routerMutex.Lock()
 	router = Router{cfg.Dynamic.ChannelMappings}
 	outputs = map[string]output.Output{}
@@ -143,13 +144,30 @@ func main() {
 			panic(k + "| ERR: " + err.Error())
 		}
 	}
+	if cfg.Debug {
+		log.Printf("DEBUG: Unlocking routerMutex")
+	}
 	routerMutex.Unlock()
 
+	if cfg.Debug {
+		log.Printf("DEBUG: Instantiating scanner")
+	}
 	scanner := bufio.NewScanner(io.MultiReader(stdout, rtlStderr))
+	if cfg.Debug {
+		log.Printf("DEBUG: scanner.Split(scan lines)")
+	}
 	scanner.Split(bufio.ScanLines)
+	if cfg.Debug {
+		log.Printf("DEBUG: Loop through scan")
+	}
 	for scanner.Scan() {
+		if cfg.Debug {
+			log.Printf("DEBUG: scanner.Text()")
+		}
 		m := scanner.Text()
-		//log.Printf("DEBUG: Found line '%s'", m)
+		if cfg.Debug {
+			log.Printf("DEBUG: Found line '%s'", m)
+		}
 		ts := time.Now()
 		alpha, err := obj.ParseAlphaMessage(ts, m)
 		if err != nil {

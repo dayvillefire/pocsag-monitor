@@ -57,7 +57,8 @@ func (a Api) ConfigReload(c *gin.Context) {
 		return
 	}
 
-	cfg.Dynamic = d
+	cfg.Dynamic = &d
+	log.Printf("ConfigReload: Reloading dynamic as : %#v", cfg.Dynamic)
 
 	// Dynamic channel mapping init
 	routerMutex.Lock()
