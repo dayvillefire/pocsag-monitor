@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -18,6 +19,8 @@ import (
 	"github.com/dayvillefire/pocsag-monitor/config"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 	"github.com/dayvillefire/pocsag-monitor/output"
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -107,25 +110,23 @@ func main() {
 		rtlCmd.Process.Kill()
 	}(rtlCmd)
 
-	/*
+	go func() {
+		log.Printf("INFO: Initializing web services")
+		m := gin.New()
+		m.Use(gin.Recovery())
+
+		// Enable gzip compression
+		m.Use(gzip.Gzip(gzip.DefaultCompression))
+
+		InitApi(m)
+
 		go func() {
-			log.Printf("INFO: Initializing web services")
-			m := gin.New()
-			m.Use(gin.Recovery())
-
-			// Enable gzip compression
-			m.Use(gzip.Gzip(gzip.DefaultCompression))
-
-			InitApi(m)
-
-			go func() {
-				log.Printf("INFO: Initializing on :%d", cfg.ApiPort)
-				if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.ApiPort), m); err != nil {
-					log.Fatal(err)
-				}
-			}()
+			log.Printf("INFO: Initializing on :%d", cfg.ApiPort)
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.ApiPort), m); err != nil {
+				log.Fatal(err)
+			}
 		}()
-	*/
+	}()
 
 	// Dynamic channel mapping init
 	if cfg.Debug {
