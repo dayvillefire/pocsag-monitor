@@ -2,3 +2,4 @@ pocsag-monitor
 *.log
 *.db
 go.sum
+go.work.sum

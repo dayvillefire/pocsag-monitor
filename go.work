@@ -1,9 +1,14 @@
-go 1.21.6
+go 1.22.0
 
 use (
 	./
 	./config
 	./controllers
+	./native
+	./native/internal/datatypes
+	./native/internal/pocsag
+	./native/internal/utils
+	./native/internal/wav
 	./obj
 	./output
 )
