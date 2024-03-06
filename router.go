@@ -1,6 +1,10 @@
 package main
 
-import "github.com/dayvillefire/pocsag-monitor/obj"
+import (
+	"strings"
+
+	"github.com/dayvillefire/pocsag-monitor/obj"
+)
 
 type Router struct {
 	ChannelMappings map[string][]string
@@ -20,6 +24,13 @@ func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 	}
 
 	for k, v := range r.ChannelMappings {
+		if strings.HasPrefix(k, "S:") {
+			if matchMessage(k[2:], msg.Message) {
+				out = append(out, v...)
+			}
+			continue
+		}
+
 		if matchCap(k, msg.CapCode) {
 			out = append(out, v...)
 		}
@@ -57,4 +68,8 @@ func matchCap(mapping, cap string) bool {
 		}
 	}
 	return true
+}
+
+func matchMessage(mapping, msg string) bool {
+	return strings.Contains(msg, mapping)
 }
