@@ -1,6 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor/config
 
-go 1.21
+go 1.22
 
 require (
 	github.com/creasty/defaults v1.7.0

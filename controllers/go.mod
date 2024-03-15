@@ -1,6 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor/controllers
 
-go 1.21
+go 1.22
 
 replace github.com/jbuchbinder/shims/factory => ../../../jbuchbinder/shims/factory
 
