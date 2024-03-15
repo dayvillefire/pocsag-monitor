@@ -9,6 +9,7 @@ POCSAG monitor is currently keyed to publish to a number of different pluggable 
 ## OUTPUT PLUGINS
 
 * discord - Discord channels
+* mqtt - MQTT queue output
 * stdout - Print to standard output
 * trigger - Trigger HTTP GET with substitutions
 
