@@ -70,6 +70,8 @@ func LoadConfigWithDefaults(configPath, dynamicConfigPath string) (*Config, erro
 		c.Dynamic = &d
 	}
 
+	config = c
+
 	return c, err
 }
 
