@@ -5,13 +5,16 @@ go 1.22
 replace github.com/jbuchbinder/shims/factory => ../../../jbuchbinder/shims/factory
 
 require (
-	github.com/bwmarrin/discordgo v0.27.1
-	github.com/jbuchbinder/shims/factory v0.0.0-00010101000000-000000000000
+	github.com/bwmarrin/discordgo v0.28.1
+	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20240318200350-9a2acd8b9cca
+	github.com/jbuchbinder/shims/factory v0.0.0-20240506232043-4fac4ec97ccb
 )
 
 require (
-	github.com/gorilla/websocket v1.5.1 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	github.com/creasty/defaults v1.7.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

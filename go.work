@@ -4,6 +4,7 @@ use (
 	./
 	./config
 	./controllers
+	./filter
 	./native
 	./native/internal/datatypes
 	./native/internal/pocsag
