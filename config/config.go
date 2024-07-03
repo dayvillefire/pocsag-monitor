@@ -28,9 +28,10 @@ type DynamicConfig struct {
 }
 
 type OutputMapping struct {
-	Plugin  string `yaml:"plugin"`
-	Option  string `yaml:"option"`
-	Channel string `yaml:"channel"`
+	Filters []string `yaml:"filters"`
+	Plugin  string   `yaml:"plugin"`
+	Option  string   `yaml:"option"`
+	Channel string   `yaml:"channel"`
 }
 
 func GetConfig() *Config {
