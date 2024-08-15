@@ -11,9 +11,9 @@ replace (
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
-	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20240318200350-9a2acd8b9cca
-	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20240318200350-9a2acd8b9cca
-	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20240318200350-9a2acd8b9cca
+	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20240718135929-e5e4f1babde7
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20240718135929-e5e4f1babde7
+	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20240718135929-e5e4f1babde7
 	github.com/genjidb/genji v0.15.3
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-gonic/gin v1.10.0
@@ -24,8 +24,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bwmarrin/discordgo v0.28.1 // indirect
-	github.com/bytedance/sonic v1.11.9 // indirect
-	github.com/bytedance/sonic/loader v0.1.1 // indirect
+	github.com/bytedance/sonic v1.12.1 // indirect
+	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
@@ -35,9 +35,9 @@ require (
 	github.com/cockroachdb/pebble v1.1.1 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
-	github.com/creasty/defaults v1.7.0 // indirect
-	github.com/eclipse/paho.mqtt.golang v1.4.3 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
+	github.com/creasty/defaults v1.8.0 // indirect
+	github.com/eclipse/paho.mqtt.golang v1.5.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.5 // indirect
 	github.com/getsentry/sentry-go v0.28.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -66,13 +66,13 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/arch v0.9.0 // indirect
+	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
-	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
