@@ -138,11 +138,14 @@ func main() {
 	for k, v := range cfg.Dynamic.OutputChannels {
 		outputs[k], err = output.InstantiateOutput(v.Plugin)
 		if err != nil {
-			panic(k + "| ERR: " + err.Error())
+			log.Printf(k + "| ERR: " + err.Error() + " - output disabled")
+			outputs[k], _ = output.InstantiateOutput("dummy")
+			continue
 		}
 		err = outputs[k].Init(v.Option)
 		if err != nil {
-			panic(k + "| ERR: " + err.Error())
+			log.Printf(k + "| ERR(Init): " + err.Error() + " - output disabled")
+			outputs[k], _ = output.InstantiateOutput("dummy")
 		}
 	}
 	if cfg.Debug {
