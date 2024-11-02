@@ -1,3 +1,4 @@
 const.go filter=git-crypt diff=git-crypt
 config.yaml filter=git-crypt diff=git-crypt
 dynamic.yaml filter=git-crypt diff=git-crypt
+output/mqtt_test.go filter=git-crypt diff=git-crypt
