@@ -7,4 +7,4 @@ replace (
 	github.com/dayvillefire/pocsag-monitor/obj => ../obj
 )
 
-require github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20241102020507-06918f66127f
+require github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20241231155749-74823eee0d9a
