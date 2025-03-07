@@ -18,21 +18,27 @@ func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 		return out
 	}
 
-	// Check for a "DEFAULT" mapping
-	if m, ok := r.ChannelMappings["DEFAULT"]; ok {
-		out = append(out, m...)
-	}
+	found := false
 
 	for k, v := range r.ChannelMappings {
 		if strings.HasPrefix(k, "S:") {
 			if matchMessage(k[2:], msg.Message) {
+				found = true
 				out = append(out, v...)
 			}
 			continue
 		}
 
 		if matchCap(k, msg.CapCode) {
+			found = true
 			out = append(out, v...)
+		}
+	}
+
+	// Check for a "DEFAULT" mapping
+	if !found {
+		if m, ok := r.ChannelMappings["DEFAULT"]; ok {
+			out = append(out, m...)
 		}
 	}
 
