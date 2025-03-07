@@ -1,4 +1,5 @@
 pocsag-monitor
+cmd/threadpurger/threadpurger
 *.log
 *.db
 go.sum
