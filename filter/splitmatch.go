@@ -58,5 +58,7 @@ func (d *SplitMatchFilter) Filter(o obj.AlphaMessage) (obj.AlphaMessage, error) 
 		f = append(f, part)
 	}
 
+	o.Message = strings.Join(f, d.split)
+
 	return o, nil
 }
