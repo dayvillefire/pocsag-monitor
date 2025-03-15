@@ -1,7 +1,8 @@
-package output
+package filter
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 
@@ -15,10 +16,13 @@ var (
 
 type Filter interface {
 	// Init initializes the plugin
-	Init(string) error
-	// SendMessage specifies an obj.AlphaMessage object, a plugin option or
-	// channel, and the message text to be sent
-	SendMessage(obj.AlphaMessage, string, string) (string, error)
+	Init() error
+
+	// Configure passes the parameters specified to the filter
+	Configure(map[string]any) error
+
+	// Filter looks at obj.AlphaMessage and processes it
+	Filter(obj.AlphaMessage) (obj.AlphaMessage, error)
 }
 
 // InstantiateFilter instantiates an Filter by name
@@ -35,9 +39,21 @@ func InstantiateFilter(name string) (o Filter, err error) {
 }
 
 // RegisterFilter adds a new Filter instance to the registry
-func RegisterOutput(name string, o func() Filter) {
+func RegisterFilter(name string, o func() Filter) {
 	filterMapLock.Lock()
 	defer filterMapLock.Unlock()
 	log.Printf("RegisterFilter: %s", name)
 	filterMap[name] = o
+}
+
+func ConfigValue[T any](cfg map[string]any, key string) (T, error) {
+	_, ok := cfg[key]
+	if !ok {
+		return *(new(T)), fmt.Errorf("key not present")
+	}
+	v, ok := cfg[key].(T)
+	if !ok {
+		return *(new(T)), fmt.Errorf("wrong type")
+	}
+	return v, nil
 }
