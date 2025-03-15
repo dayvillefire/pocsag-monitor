@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dayvillefire/pocsag-monitor/obj"
+	"github.com/jbuchbinder/shims"
 )
 
 type Router struct {
@@ -42,7 +43,7 @@ func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 		}
 	}
 
-	return out
+	return shims.UniqueValues(out)
 }
 
 func matchCap(mapping, cap string) bool {
