@@ -13,13 +13,14 @@ replace (
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
-	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20250307220123-b322b7461f25
-	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20250307220123-b322b7461f25
-	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20250307220123-b322b7461f25
+	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20250318142806-ea41a6973586
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20250317121035-90c80916e36b
+	github.com/dayvillefire/pocsag-monitor/output v0.0.0-20250318142806-ea41a6973586
 	github.com/genjidb/genji v0.15.3
 	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jbuchbinder/shims v0.0.0-20250315180801-ea13cafaf717
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -31,7 +32,6 @@ require (
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240616162244-4768e80dfb9a // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect

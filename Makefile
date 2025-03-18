@@ -6,5 +6,8 @@ clean:
 binary: clean
 	GOARM=5 GOARCH=arm go build -v
 
-copy: binary
+test-config:
+	go test -run Test_Config -v
+
+copy: binary test-config
 	rsync -rvutpP pocsag-monitor config.yaml dynamic.yaml jbuchbinder@manage:
