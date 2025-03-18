@@ -58,7 +58,7 @@ func (a Api) ConfigReload(c *gin.Context) {
 	d, err := config.ReloadDynamicConfig(*dynamicConfigFile)
 	if err != nil {
 		log.Print(err.Error())
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"return": false, "message": err.Error()})
 		return
 	}
 
@@ -74,18 +74,18 @@ func (a Api) ConfigReload(c *gin.Context) {
 		outputs[k], err = output.InstantiateOutput(v.Plugin)
 		if err != nil {
 			log.Printf(k + "| ERR: " + err.Error())
-			c.JSON(http.StatusInternalServerError, k+": "+err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"return": false, "message": k + ": " + err.Error()})
 			return
 		}
 		err = outputs[k].Init(v.Option)
 		if err != nil {
 			log.Printf(k + "| ERR: " + err.Error())
-			c.JSON(http.StatusInternalServerError, k+": "+err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"return": false, "message": k + ": " + err.Error()})
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, true)
+	c.JSON(http.StatusOK, gin.H{"return": true, "message": "success"})
 }
 
 func (a Api) TestPage(c *gin.Context) {
