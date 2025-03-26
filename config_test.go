@@ -19,3 +19,11 @@ func Test_Config(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func Test_LoadConfig(t *testing.T) {
+	c, err := config.LoadConfigWithDefaults("config.yaml", "dynamic.yaml")
+	if err != nil {
+		t.Fatalf("%s", err.Error())
+	}
+	t.Logf("%#v\n", c)
+}
