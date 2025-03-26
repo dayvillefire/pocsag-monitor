@@ -50,7 +50,7 @@ func matchCap(mapping, cap string) bool {
 	// Make sure it's 7 digits long prefixed by 0's
 	mycap := ""
 	if len(cap) < 7 {
-		for i := 0; i < 7-len(cap); i++ {
+		for range 7 - len(cap) {
 			mycap = mycap + "0"
 		}
 		mycap = mycap + cap
@@ -78,5 +78,5 @@ func matchCap(mapping, cap string) bool {
 }
 
 func matchMessage(mapping, msg string) bool {
-	return strings.Contains(msg, mapping)
+	return strings.Contains(strings.ToUpper(msg), strings.ToUpper(mapping))
 }
