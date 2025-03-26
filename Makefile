@@ -1,10 +1,12 @@
+VERSION := $(shell date +%Y%m%d.%H%M)
+
 all: binary
 
 clean:
 	go clean -v
 
 binary: clean
-	GOARM=5 GOARCH=arm go build -v
+	GOARM=5 GOARCH=arm go build -v -ldflags "-X main.Version=${VERSION}"
 
 test-config:
 	go test -run Test_Config -v

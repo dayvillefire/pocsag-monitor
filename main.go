@@ -29,6 +29,7 @@ var (
 	testConfig        = flag.Bool("test-config", false, "Test config")
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
 
+	Version     string
 	cfg         *config.Config
 	router      Router
 	outputs     map[string]output.Output
@@ -75,7 +76,7 @@ func main() {
 
 	rtlStderr, _ := rtlCmd.StderrPipe()
 
-	mmonArg := fmt.Sprintf("-t raw -a POCSAG512 -f alpha -u /dev/stdin")
+	mmonArg := "-t raw -a POCSAG512 -f alpha -u /dev/stdin"
 	mmonCmd := exec.Command(cfg.MultiMonBinary, strings.Split(mmonArg, " ")...)
 
 	mmonCmd.Stdin, _ = rtlCmd.StdoutPipe()

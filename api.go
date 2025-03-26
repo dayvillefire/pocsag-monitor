@@ -23,6 +23,7 @@ func InitApi(m *gin.Engine) {
 	g.GET("/config/reload", a.ConfigReload)
 	g.GET("/test/page/:capcode/:msg", a.TestPage)
 	g.GET("/test/route/:dest/:msg", a.TestRoute)
+	g.GET("/version", a.Version)
 	/*
 		g.GET("/calls/active", a.ActiveCalls)
 		g.GET("/call/detail/:fdid/:id", a.CallDetail)
@@ -35,7 +36,7 @@ type Api struct {
 }
 
 func (a Api) Debug(c *gin.Context) {
-	o := map[string]interface{}{}
+	o := map[string]any{}
 
 	o["remote-ip"] = c.Request.RemoteAddr
 	o["environment"] = os.Environ()
@@ -147,4 +148,8 @@ func (a Api) TestRoute(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, true)
+}
+
+func (a Api) Version(c *gin.Context) {
+	c.JSON(http.StatusOK, Version)
 }
