@@ -30,11 +30,24 @@ var (
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
 
 	Version     string
+	logRoute    string
 	cfg         *config.Config
 	router      Router
 	outputs     map[string]output.Output
 	routerMutex = &sync.Mutex{}
 )
+
+func logger(s string) {
+	log.Print(s)
+	if logRoute != "" {
+		outputs[logRoute].SendMessage(
+			obj.AlphaMessage{},
+			cfg.Dynamic.OutputChannels[logRoute].Channel,
+			s,
+		)
+		return
+	}
+}
 
 func main() {
 	flag.Parse()
@@ -154,6 +167,10 @@ func main() {
 	}
 	routerMutex.Unlock()
 
+	// Establish log route
+	logRoute = router.LogRoute()
+	logger("Initialized pocsag router version " + Version + " at " + time.Now().String())
+
 	if cfg.Debug {
 		log.Printf("DEBUG: Instantiating scanner")
 	}
@@ -176,7 +193,7 @@ func main() {
 		ts := time.Now()
 		alpha, err := obj.ParseAlphaMessage(ts, m)
 		if err != nil {
-			log.Printf("ERR: %s", err.Error())
+			logger("ParseAlphaMessage: ERR: " + err.Error())
 			continue
 		}
 		if alpha.Valid {
@@ -190,6 +207,14 @@ func main() {
 					alpha.Message,
 					alpha.Timestamp.Format("2006-01-02 15:04:05"),
 				)
+				if outputs[c] == nil {
+					logger(fmt.Sprintf("ERROR: dest=%s|outputchannel[%s]|msg=%s",
+						dest,
+						c,
+						msg,
+					))
+					continue
+				}
 				if cfg.Debug {
 					log.Printf("DEBUG: dest=%s|option=%s|msg=%s",
 						dest,

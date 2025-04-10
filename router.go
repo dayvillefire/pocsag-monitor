@@ -11,6 +11,15 @@ type Router struct {
 	ChannelMappings map[string][]string
 }
 
+func (r *Router) LogRoute() string {
+	if m, ok := r.ChannelMappings["LOG"]; ok {
+		if len(m) > 0 {
+			return m[0]
+		}
+	}
+	return ""
+}
+
 func (r *Router) MapMessage(msg obj.AlphaMessage) []string {
 	out := []string{}
 
