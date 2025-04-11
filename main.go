@@ -29,12 +29,13 @@ var (
 	testConfig        = flag.Bool("test-config", false, "Test config")
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
 
-	Version     string
-	logRoute    string
-	cfg         *config.Config
-	router      Router
-	outputs     map[string]output.Output
-	routerMutex = &sync.Mutex{}
+	Version      string
+	logRoute     string
+	cfg          *config.Config
+	router       Router
+	outputs      map[string]output.Output
+	outputsMutex = &sync.Mutex{}
+	routerMutex  = &sync.Mutex{}
 )
 
 func logger(s string) {
@@ -149,19 +150,33 @@ func main() {
 	routerMutex.Lock()
 	router = Router{cfg.Dynamic.ChannelMappings}
 	outputs = map[string]output.Output{}
+	wg := &sync.WaitGroup{}
 	for k, v := range cfg.Dynamic.OutputChannels {
-		outputs[k], err = output.InstantiateOutput(v.Plugin)
-		if err != nil {
-			log.Printf(k + "| ERR: " + err.Error() + " - output disabled")
-			outputs[k], _ = output.InstantiateOutput("dummy")
-			continue
-		}
-		err = outputs[k].Init(v.Option)
-		if err != nil {
-			log.Printf(k + "| ERR(Init): " + err.Error() + " - output disabled")
-			outputs[k], _ = output.InstantiateOutput("dummy")
-		}
+		wg.Add(1)
+		go func(k string, v config.OutputMapping) {
+			defer wg.Done()
+			log.Printf("[%s] Instantiating %s", k, v.Plugin)
+			o, err := output.InstantiateOutput(v.Plugin)
+			if err != nil {
+				log.Printf(k + "| ERR: " + err.Error() + " - output disabled")
+				o, _ = output.InstantiateOutput("dummy")
+				outputsMutex.Lock()
+				outputs[k] = o
+				outputsMutex.Unlock()
+				return
+			}
+			err = o.Init(v.Option)
+			if err != nil {
+				log.Printf(k + "| ERR(Init): " + err.Error() + " - output disabled")
+				o, _ = output.InstantiateOutput("dummy")
+			}
+			outputsMutex.Lock()
+			outputs[k] = o
+			log.Printf("[%s] Init completed", k)
+			outputsMutex.Unlock()
+		}(k, v)
 	}
+	wg.Wait()
 	if cfg.Debug {
 		log.Printf("DEBUG: Unlocking routerMutex")
 	}
