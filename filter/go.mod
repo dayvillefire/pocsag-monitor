@@ -7,12 +7,7 @@ replace (
 	github.com/dayvillefire/pocsag-monitor/obj => ../obj
 )
 
-require github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20241231155749-74823eee0d9a
-
 require (
-	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/jessevdk/go-flags v1.4.0 // indirect
-	github.com/mattn/go-shellwords v1.0.11 // indirect
-	github.com/zyedidia/gpeg v0.0.0-20210126031808-c49c92955001 // indirect
-	github.com/zyedidia/sregx v0.3.0 // indirect
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20250411125416-eecc4a8a5f6c
+	github.com/jbuchbinder/shims v0.0.0-20250315180801-ea13cafaf717
 )
