@@ -1,16 +1,13 @@
 go 1.24.0
 
+toolchain go1.24.3
+
 use (
 	./
 	./cmd/threadpurger
 	./config
 	./controllers
 	./filter
-	./native
-	./native/internal/datatypes
-	./native/internal/pocsag
-	./native/internal/utils
-	./native/internal/wav
 	./obj
 	./output
 )
