@@ -1,10 +1,6 @@
 package output
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	"github.com/dayvillefire/groupme"
 	"github.com/dayvillefire/pocsag-monitor/obj"
 )
@@ -21,12 +17,15 @@ type GroupMeOutput struct {
 }
 
 func (s *GroupMeOutput) Init(token string) error {
-	parts := strings.Split(token, ":")
-	if len(parts) != 2 {
-		return fmt.Errorf("bad token -- needs to be botID:token")
-	}
-	s.token = parts[1]
-	s.botID = parts[0]
+	/*
+		parts := strings.Split(token, ":")
+		if len(parts) != 2 {
+			return fmt.Errorf("bad token -- needs to be botID:token")
+		}
+		s.token = parts[1]
+		s.botID = parts[0]
+	*/
+	s.botID = token
 	return nil
 }
 
@@ -34,7 +33,9 @@ func (s *GroupMeOutput) SendMessage(a obj.AlphaMessage, channel, msg string) (st
 	s.client = groupme.NewClient(groupme.V3BaseURL, s.token)
 	s.bot = groupme.NewBot(groupme.V3BaseURL, s.botID, channel, "", "")
 
-	_, err := s.client.CreateMessage(channel, fmt.Sprintf("%s", time.Now().String()), msg)
+	err := s.bot.Post(msg, nil)
+
+	//_, err := s.client.CreateMessage(channel, fmt.Sprintf("%s", time.Now().String()), msg)
 	//log.Printf("ret = %#v", ret)
 	return "", err
 }
