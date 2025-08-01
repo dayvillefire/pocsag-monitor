@@ -116,6 +116,9 @@ func main() {
 	go func(sig chan os.Signal, rtlCmd *exec.Cmd, mmonCmd *exec.Cmd) {
 		s := <-sig
 		log.Printf("Caught signal %s, terminating", s.String())
+
+		logger("Terminating pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
+
 		rtlCmd.Process.Kill()
 		mmonCmd.Process.Kill()
 	}(sig, rtlCmd, mmonCmd)
@@ -158,6 +161,7 @@ func main() {
 			log.Printf("[%s] Instantiating %s", k, v.Plugin)
 			o, err := output.InstantiateOutput(v.Plugin)
 			if err != nil {
+				logger(k + "| ERR: " + err.Error() + " - output disabled")
 				log.Printf(k + "| ERR: " + err.Error() + " - output disabled")
 				o, _ = output.InstantiateOutput("dummy")
 				outputsMutex.Lock()
@@ -167,6 +171,7 @@ func main() {
 			}
 			err = o.Init(v.Option)
 			if err != nil {
+				logger(k + "| ERR(Init): " + err.Error() + " - output disabled")
 				log.Printf(k + "| ERR(Init): " + err.Error() + " - output disabled")
 				o, _ = output.InstantiateOutput("dummy")
 			}
@@ -184,7 +189,7 @@ func main() {
 
 	// Establish log route
 	logRoute = router.LogRoute()
-	logger("Initialized pocsag router version " + Version + " at " + time.Now().String())
+	logger("Initialized pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
 
 	if cfg.Debug {
 		log.Printf("DEBUG: Instantiating scanner")

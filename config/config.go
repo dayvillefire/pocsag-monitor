@@ -19,6 +19,7 @@ type Config struct {
 	MultiMonBinary string         `yaml:"multimon" default:"multimon-ng"`
 	PPM            int            `yaml:"ppm" default:"0"`
 	ApiPort        int            `yaml:"api-port" default:"8080"`
+	InstanceName   string         `yaml:"instance-name" default:"DEFAULT"`
 	Dynamic        *DynamicConfig `yaml:"-"`
 }
 
