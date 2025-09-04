@@ -8,6 +8,6 @@ replace (
 )
 
 require (
-	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20250411125416-eecc4a8a5f6c
-	github.com/jbuchbinder/shims v0.0.0-20250315180801-ea13cafaf717
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20250828124955-f581123ea150
+	github.com/jbuchbinder/shims v0.0.0-20250818154854-22c0ac83b788
 )
