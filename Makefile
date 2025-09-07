@@ -17,3 +17,11 @@ test-config:
 
 copy: binary-arm test-config
 	rsync -rvutpP pocsag-monitor config.yaml dynamic.yaml jbuchbinder@manage:
+
+deploy: copy
+	@echo "Stopping pocsag-monitor ... "
+	@ssh jbuchbinder@manage sudo systemctl stop pocsag-monitor
+	@echo "Waiting for three seconds ... "
+	@sleep 3
+	@echo "Starting pocsag-monitor ... "
+	@ssh jbuchbinder@manage sudo systemctl start pocsag-monitor
