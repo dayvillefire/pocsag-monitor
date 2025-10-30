@@ -12,8 +12,9 @@ func init() {
 }
 
 type SplitMatchFilter struct {
-	split  string
-	fields []int
+	ifmatch string
+	split   string
+	fields  []int
 }
 
 func (d *SplitMatchFilter) Init() error {
@@ -22,6 +23,13 @@ func (d *SplitMatchFilter) Init() error {
 
 // Configure passes the parameters specified to the filter
 func (d *SplitMatchFilter) Configure(cfg map[string]any) error {
+	ifmatch, err := ConfigValue[string](cfg, "if-match")
+	if err != nil {
+		ifmatch = ""
+	}
+
+	d.ifmatch = ifmatch
+
 	split, err := ConfigValue[string](cfg, "split")
 	if err != nil {
 		return err
@@ -43,6 +51,11 @@ func (d *SplitMatchFilter) Configure(cfg map[string]any) error {
 // Filter looks at obj.AlphaMessage and processes it
 func (d *SplitMatchFilter) Filter(o obj.AlphaMessage) (obj.AlphaMessage, error) {
 	msg := o.Message
+
+	// If there's a matching string, check for it
+	if d.ifmatch != "" && !strings.Contains(msg, d.ifmatch) {
+		return o, nil
+	}
 
 	// If there is no split in the string, return as is
 	if !strings.Contains(msg, d.split) {
