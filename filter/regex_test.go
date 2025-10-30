@@ -14,7 +14,8 @@ func TestFilter(t *testing.T) {
 	}
 	err = rf.Configure(map[string]any{
 		"regexps": []string{
-			"ALPHA | ([^|]+)|",
+			"ALPHA . ([^|]+)|",
+			"AMBULANCE EMERGENCY . ([^|]+)|",
 		},
 	})
 	if err != nil {

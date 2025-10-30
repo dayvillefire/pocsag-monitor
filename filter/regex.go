@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	RegisterFilter("dummy", func() Filter { return &DummyFilter{} })
+	RegisterFilter("regex", func() Filter { return &RegexFilter{} })
 }
 
 type RegexFilter struct {
