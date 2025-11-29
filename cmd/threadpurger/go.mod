@@ -1,8 +1,6 @@
 module github.com/dayvillefire/pocsag-monitor/cmd/threadpurger
 
-go 1.23.0
-
-toolchain go1.24.3
+go 1.25
 
 require github.com/bwmarrin/discordgo v0.29.0
 

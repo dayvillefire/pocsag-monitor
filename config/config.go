@@ -12,27 +12,18 @@ var (
 )
 
 type Config struct {
-	Debug          bool           `yaml:"debug" default:"false"`
-	DbFile         string         `yaml:"db-file" default:"scan.db"`
-	RtlFmBinary    string         `yaml:"rtlfm" default:"rtl_fm"`
-	Frequency      string         `yaml:"frequency" default:"152.00750M"`
-	MultiMonBinary string         `yaml:"multimon" default:"multimon-ng"`
-	PPM            int            `yaml:"ppm" default:"0"`
-	ApiPort        int            `yaml:"api-port" default:"8080"`
-	InstanceName   string         `yaml:"instance-name" default:"DEFAULT"`
-	Dynamic        *DynamicConfig `yaml:"-"`
-}
-
-type DynamicConfig struct {
-	OutputChannels  map[string]OutputMapping `yaml:"output-channels"`
-	ChannelMappings map[string][]string      `yaml:"channel-mappings"`
-}
-
-type OutputMapping struct {
-	Filters []string `yaml:"filters"`
-	Plugin  string   `yaml:"plugin"`
-	Option  string   `yaml:"option"`
-	Channel string   `yaml:"channel"`
+	Debug          bool   `yaml:"debug" default:"false"`
+	DbFile         string `yaml:"db-file" default:"scan.db"`
+	RtlFmBinary    string `yaml:"rtlfm" default:"rtl_fm"`
+	Frequency      string `yaml:"frequency" default:"152.00750M"`
+	MultiMonBinary string `yaml:"multimon" default:"multimon-ng"`
+	PPM            int    `yaml:"ppm" default:"0"`
+	ApiPort        int    `yaml:"api-port" default:"8080"`
+	InstanceName   string `yaml:"instance-name" default:"DEFAULT"`
+	Router         struct {
+		URL   string `yaml:"url"`
+		Topic string `yaml:"topic" default:"pages"`
+	} `yaml:"router"`
 }
 
 func GetConfig() *Config {
@@ -62,31 +53,7 @@ func LoadConfigWithDefaults(configPath, dynamicConfigPath string) (*Config, erro
 		return c, err
 	}
 
-	{
-		d := DynamicConfig{}
-		data, err = os.ReadFile(dynamicConfigPath)
-		if err != nil {
-			return c, err
-		}
-		err = yaml.Unmarshal([]byte(data), &d)
-		c.Dynamic = &d
-	}
-
 	config = c
 
 	return c, err
-}
-
-func ReloadDynamicConfig(dynamicConfigPath string) (DynamicConfig, error) {
-	d := DynamicConfig{}
-	data, err := os.ReadFile(dynamicConfigPath)
-	if err != nil {
-		return d, err
-	}
-	err = yaml.Unmarshal([]byte(data), &d)
-	if err != nil {
-		return d, err
-	}
-	//config.Dynamic = &d
-	return d, nil
 }

@@ -4,3 +4,8 @@ dynamic.yaml filter=git-crypt diff=git-crypt
 output/groupme_test.go filter=git-crypt diff=git-crypt
 output/mqtt_test.go filter=git-crypt diff=git-crypt
 cmd/threadpurger/const.go filter=git-crypt diff=git-crypt
+
+# Secrets
+.env filter=git-crypt diff=git-crypt
+*.pem filter=git-crypt diff=git-crypt
+

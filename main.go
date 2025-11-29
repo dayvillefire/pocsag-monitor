@@ -11,16 +11,16 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/dayvillefire/pocsag-monitor/config"
-	"github.com/dayvillefire/pocsag-monitor/obj"
-	"github.com/dayvillefire/pocsag-monitor/output"
+	"github.com/dayvillefire/pocsag-router/client"
+	"github.com/dayvillefire/pocsag-router/obj"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -29,31 +29,22 @@ var (
 	testConfig        = flag.Bool("test-config", false, "Test config")
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
 
-	Version      string
-	logRoute     string
-	cfg          *config.Config
-	router       Router
-	outputs      map[string]output.Output
-	outputsMutex = &sync.Mutex{}
-	routerMutex  = &sync.Mutex{}
+	Version string
+	//logRoute string
+	cfg    *config.Config
+	router *client.Client
 )
-
-func logger(s string) {
-	log.Print(s)
-	if logRoute != "" {
-		outputs[logRoute].SendMessage(
-			obj.AlphaMessage{},
-			cfg.Dynamic.OutputChannels[logRoute].Channel,
-			s,
-		)
-		return
-	}
-}
 
 func main() {
 	flag.Parse()
 
 	var err error
+
+	err = godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	cfg, err = config.LoadConfigWithDefaults(*configFile, *dynamicConfigFile)
 	if err != nil {
 		log.Fatal(err)
@@ -83,6 +74,18 @@ func main() {
 				time.Sleep(interval / 3)
 			}
 		}()
+	}
+
+	log.Printf("INFO: Connecting to router at %s", cfg.Router.URL)
+	router, err = client.NewClient(
+		cfg.Router.URL,
+		client.ClientTLSConfig{
+			ClientCert: os.Getenv("CLIENT_CERT_FILE"),
+			ClientKey:  os.Getenv("CLIENT_KEY_FILE"),
+			RootCA:     os.Getenv("CA_CERT"),
+		})
+	if err != nil {
+		panic(err)
 	}
 
 	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", cfg.Frequency, cfg.PPM)
@@ -115,16 +118,16 @@ func main() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGABRT)
 	go func(sig chan os.Signal, rtlCmd *exec.Cmd, mmonCmd *exec.Cmd) {
 		s := <-sig
-		log.Printf("Caught signal %s, terminating", s.String())
+		log.Printf("INFO: Caught signal %s, terminating", s.String())
 
-		logger("Terminating pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
+		log.Print("INFO: Terminating pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
 
 		rtlCmd.Process.Kill()
 		mmonCmd.Process.Kill()
 	}(sig, rtlCmd, mmonCmd)
 	defer func(rtlCmd *exec.Cmd) {
 		// If, for some reason, this doesn't die gracefully, kill it with fire
-		log.Printf("Non-gracefully terminating rtl_fm")
+		log.Printf("INFO: Non-gracefully terminating rtl_fm")
 		rtlCmd.Process.Kill()
 	}(rtlCmd)
 
@@ -146,50 +149,7 @@ func main() {
 		}()
 	}()
 
-	// Dynamic channel mapping init
-	if cfg.Debug {
-		log.Printf("DEBUG: Locking routerMutex")
-	}
-	routerMutex.Lock()
-	router = Router{cfg.Dynamic.ChannelMappings}
-	outputs = map[string]output.Output{}
-	wg := &sync.WaitGroup{}
-	for k, v := range cfg.Dynamic.OutputChannels {
-		wg.Add(1)
-		go func(k string, v config.OutputMapping) {
-			defer wg.Done()
-			log.Printf("[%s] Instantiating %s", k, v.Plugin)
-			o, err := output.InstantiateOutput(v.Plugin)
-			if err != nil {
-				logger(k + "| ERR: " + err.Error() + " - output disabled")
-				log.Printf(k + "| ERR: " + err.Error() + " - output disabled")
-				o, _ = output.InstantiateOutput("dummy")
-				outputsMutex.Lock()
-				outputs[k] = o
-				outputsMutex.Unlock()
-				return
-			}
-			err = o.Init(v.Option)
-			if err != nil {
-				logger(k + "| ERR(Init): " + err.Error() + " - output disabled")
-				log.Printf(k + "| ERR(Init): " + err.Error() + " - output disabled")
-				o, _ = output.InstantiateOutput("dummy")
-			}
-			outputsMutex.Lock()
-			outputs[k] = o
-			log.Printf("[%s] Init completed", k)
-			outputsMutex.Unlock()
-		}(k, v)
-	}
-	wg.Wait()
-	if cfg.Debug {
-		log.Printf("DEBUG: Unlocking routerMutex")
-	}
-	routerMutex.Unlock()
-
-	// Establish log route
-	logRoute = router.LogRoute()
-	logger("Initialized pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
+	log.Print("INFO: Initialized pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
 
 	if cfg.Debug {
 		log.Printf("DEBUG: Instantiating scanner")
@@ -213,43 +173,13 @@ func main() {
 		ts := time.Now()
 		alpha, err := obj.ParseAlphaMessage(ts, m)
 		if err != nil {
-			logger("ParseAlphaMessage: ERR: " + err.Error())
+			log.Printf("ERR: ParseAlphaMessage: %s", err.Error())
 			continue
 		}
 		if alpha.Valid {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
-			routerMutex.Lock()
-			dest := router.MapMessage(alpha)
-			for _, c := range dest {
-				msg := fmt.Sprintf(
-					"%s: %s [%s]",
-					alpha.CapCode,
-					alpha.Message,
-					alpha.Timestamp.Format("2006-01-02 15:04:05"),
-				)
-				if outputs[c] == nil {
-					logger(fmt.Sprintf("ERROR: dest=%s|outputchannel[%s]|msg=%s",
-						dest,
-						c,
-						msg,
-					))
-					continue
-				}
-				if cfg.Debug {
-					log.Printf("DEBUG: dest=%s|option=%s|msg=%s",
-						dest,
-						cfg.Dynamic.OutputChannels[c].Channel,
-						msg,
-					)
-				}
-				outputs[c].SendMessage(
-					alpha,
-					cfg.Dynamic.OutputChannels[c].Channel,
-					msg,
-				)
-			}
-			routerMutex.Unlock()
-			//db.Record(DB, alpha)
+			// transmit
+			router.Publish(cfg.Router.Topic, alpha)
 			continue
 		}
 	}

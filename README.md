@@ -4,14 +4,7 @@ Golang POCSAG512 monitor, designed to be run on a Linux machine.
 
 This code has been run on a [Raspberry Pi Zero W](https://amzn.to/3bflIyP) (the slower first-generation model) if anyone wants to run this on a standalone single-chip machine.
 
-POCSAG monitor is currently keyed to publish to a number of different pluggable outputs, but is primarily designed to push to Discord channels.
-
-## OUTPUT PLUGINS
-
-* discord - Discord channels
-* mqtt - MQTT queue output
-* stdout - Print to standard output
-* trigger - Trigger HTTP GET with substitutions
+POCSAG monitor is now designed to be used with [pocsag-router](https://github.com/dayvillefire/pocsag-router), which allows aggregation and deduplication from multiple redundant monitors.
 
 ## PREREQUISITES
 

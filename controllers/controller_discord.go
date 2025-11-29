@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dayvillefire/pocsag-monitor/config"
 )
 
 var (
@@ -253,13 +252,15 @@ func (d DiscordController) applicationCommands() []*discordgo.ApplicationCommand
 func (d *DiscordController) commandHandlers() map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"show-config": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			dc := config.GetConfig().Dynamic
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("%#v", dc),
-				},
-			})
+			/*
+				dc := config.GetConfig().Dynamic
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf("%#v", dc),
+					},
+				})
+			*/
 		},
 	}
 }
