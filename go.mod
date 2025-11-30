@@ -15,8 +15,8 @@ replace (
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
-	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20251030120641-3173cacfbeca
-	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20251030120641-3173cacfbeca
+	github.com/dayvillefire/pocsag-monitor/config v0.0.0-20251129170101-653aa2e0878d
+	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-20251129170101-653aa2e0878d
 	github.com/dayvillefire/pocsag-router/client v0.0.0-00010101000000-000000000000
 	github.com/dayvillefire/pocsag-router/obj v0.0.0-00010101000000-000000000000
 	github.com/genjidb/genji v0.15.3
