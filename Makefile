@@ -7,10 +7,10 @@ clean:
 	rm -f pocsag-monitor.bin
 
 binary-arm: clean
-	GOARM=5 GOARCH=arm go build -v -ldflags "-X main.Version=${VERSION}"
+	GOARM=5 GOARCH=arm go build -v -ldflags "-X main.Version=${VERSION}" ./cmd/pocsag-monitor
 
 binary: clean
-	go build -v -ldflags "-X main.Version=${VERSION}" -o pocsag-monitor.bin
+	go build -v -ldflags "-X main.Version=${VERSION}" -o pocsag-monitor.bin ./cmd/pocsag-monitor
 
 test-config:
 	go test -run Test_LoadConfig -v
