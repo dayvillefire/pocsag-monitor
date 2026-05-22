@@ -5,4 +5,7 @@ use (
 	./cmd/pocsag-monitor
 	./config
 	./obj
+	./pocsag
+	./sdr
+./cmd/pocsag-rx
 )

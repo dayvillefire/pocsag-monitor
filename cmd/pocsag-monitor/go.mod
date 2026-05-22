@@ -5,6 +5,8 @@ go 1.25.5
 replace (
 	github.com/dayvillefire/pocsag-monitor/config => ../../config
 	github.com/dayvillefire/pocsag-monitor/obj => ../../obj
+	github.com/dayvillefire/pocsag-monitor/pocsag => ../../pocsag
+	github.com/dayvillefire/pocsag-monitor/sdr => ../../sdr
 	github.com/dayvillefire/pocsag-router/client => ../../../pocsag-router/client
 	github.com/dayvillefire/pocsag-router/obj => ../../../pocsag-router/obj
 )
@@ -13,6 +15,8 @@ require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/dayvillefire/pocsag-monitor/config v0.0.0-00010101000000-000000000000
 	github.com/dayvillefire/pocsag-monitor/obj v0.0.0-00010101000000-000000000000
+	github.com/dayvillefire/pocsag-monitor/pocsag v0.0.0-00010101000000-000000000000
+	github.com/dayvillefire/pocsag-monitor/sdr v0.0.0-00010101000000-000000000000
 	github.com/dayvillefire/pocsag-router/client v0.0.0-00010101000000-000000000000
 	github.com/dayvillefire/pocsag-router/obj v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/gzip v1.2.5

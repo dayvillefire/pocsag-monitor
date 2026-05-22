@@ -43,6 +43,11 @@ func (a Api) Debug(c *gin.Context) {
 	o["num-cpus"] = runtime.NumCPU()
 	o["running-goroutines"] = runtime.NumGoroutine()
 
+	if decoder != nil {
+		stats := decoder.Stats()
+		o["decoder-stats"] = stats
+	}
+
 	c.JSON(http.StatusOK, o)
 }
 

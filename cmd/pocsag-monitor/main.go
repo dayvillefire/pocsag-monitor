@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -16,8 +13,10 @@ import (
 
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/dayvillefire/pocsag-monitor/config"
+	"github.com/dayvillefire/pocsag-monitor/pocsag"
+	"github.com/dayvillefire/pocsag-monitor/sdr"
 	"github.com/dayvillefire/pocsag-router/client"
-	"github.com/dayvillefire/pocsag-router/obj"
+	routerobj "github.com/dayvillefire/pocsag-router/obj"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -30,10 +29,20 @@ var (
 	daemonize         = flag.Bool("daemon", false, "Daemonize")
 
 	Version string
-	//logRoute string
-	cfg    *config.Config
-	router *client.Client
+	cfg     *config.Config
+	router  *client.Client
+	decoder *pocsag.Decoder
 )
+
+func parseFrequency(f string) (int, error) {
+	f = strings.TrimSuffix(f, "M")
+	f = strings.TrimSuffix(f, "m")
+	var hz float64
+	if _, err := fmt.Sscanf(f, "%f", &hz); err != nil {
+		return 0, err
+	}
+	return int(hz * 1000000), nil
+}
 
 func main() {
 	flag.Parse()
@@ -88,48 +97,37 @@ func main() {
 		panic(err)
 	}
 
-	rtlArg := fmt.Sprintf("-f %s -p %d -s 22050", cfg.Frequency, cfg.PPM)
-	rtlCmd := exec.Command(cfg.RtlFmBinary, strings.Split(rtlArg, " ")...)
+	// Native SDR + POCSAG pipeline
+	log.Printf("INFO: Initializing native SDR source")
+	src := sdr.NewRTLSource(cfg.SDR.DeviceIndex)
 
-	rtlStderr, _ := rtlCmd.StderrPipe()
+	freqHz, err := parseFrequency(cfg.Frequency)
+	if err != nil {
+		log.Fatalf("ERR: invalid frequency %s: %s", cfg.Frequency, err.Error())
+	}
 
-	mmonArg := "-t raw -a POCSAG512 -f alpha -u /dev/stdin"
-	mmonCmd := exec.Command(cfg.MultiMonBinary, strings.Split(mmonArg, " ")...)
+	iqCh, err := src.Start(freqHz, cfg.SDR.SampleRate, cfg.PPM, cfg.SDR.Gain)
+	if err != nil {
+		log.Fatalf("ERR: SDR start failed: %s", err.Error())
+	}
+	defer src.Stop()
 
-	mmonCmd.Stdin, _ = rtlCmd.StdoutPipe()
-	stdout, err := mmonCmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-	err = mmonCmd.Start()
-	if err != nil {
-		panic(err)
-	}
-	err = rtlCmd.Start()
-	if err != nil {
-		panic(err)
-	}
-	defer stdout.Close()
-	defer rtlStderr.Close()
+	log.Printf("INFO: Initializing native POCSAG512 decoder")
+	decoder = pocsag.NewDecoder()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGABRT)
-	go func(sig chan os.Signal, rtlCmd *exec.Cmd, mmonCmd *exec.Cmd) {
+	go func(sig chan os.Signal) {
 		s := <-sig
 		log.Printf("INFO: Caught signal %s, terminating", s.String())
 
 		log.Print("INFO: Terminating pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
 
-		rtlCmd.Process.Kill()
-		mmonCmd.Process.Kill()
-	}(sig, rtlCmd, mmonCmd)
-	defer func(rtlCmd *exec.Cmd) {
-		// If, for some reason, this doesn't die gracefully, kill it with fire
-		log.Printf("INFO: Non-gracefully terminating rtl_fm")
-		rtlCmd.Process.Kill()
-	}(rtlCmd)
+		src.Stop()
+		os.Exit(0)
+	}(sig)
 
 	go func() {
 		log.Printf("INFO: Initializing web services")
@@ -151,37 +149,10 @@ func main() {
 
 	log.Print("INFO: Initialized pocsag router " + config.GetConfig().InstanceName + " version " + Version + " at " + time.Now().Local().Format(time.RFC3339))
 
-	if cfg.Debug {
-		log.Printf("DEBUG: Instantiating scanner")
-	}
-	scanner := bufio.NewScanner(io.MultiReader(stdout, rtlStderr))
-	if cfg.Debug {
-		log.Printf("DEBUG: scanner.Split(scan lines)")
-	}
-	scanner.Split(bufio.ScanLines)
-	if cfg.Debug {
-		log.Printf("DEBUG: Loop through scan")
-	}
-	for scanner.Scan() {
-		if cfg.Debug {
-			log.Printf("DEBUG: scanner.Text()")
-		}
-		m := scanner.Text()
-		if cfg.Debug {
-			log.Printf("DEBUG: Found line '%s'", m)
-		}
-		ts := time.Now()
-		alpha, err := obj.ParseAlphaMessage(ts, m)
-		if err != nil {
-			log.Printf("ERR: ParseAlphaMessage: %s", err.Error())
-			continue
-		}
+	for alpha := range decoder.Decode(iqCh) {
 		if alpha.Valid {
 			log.Printf("CAP: %s\tMSG: %s", alpha.CapCode, alpha.Message)
-			// transmit
-			router.Publish(cfg.Router.Topic, alpha)
-			continue
+			router.Publish(cfg.Router.Topic, routerobj.AlphaMessage(alpha))
 		}
 	}
-	mmonCmd.Wait()
 }
